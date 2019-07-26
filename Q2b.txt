@@ -1,0 +1,51 @@
+JSON code for ec2 instance in github (CFT template):
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Resources" : {
+    "WebServerInstance": {
+      "Type" : "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId" : "ami-0b898040803850657"
+        "InstanceType"   : "t2.micro",
+        
+    		}
+	}
+  },
+
+  "Outputs" : {
+    "WebsiteURL" : {
+      "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServerInstance", "PublicDnsName" ]} ]]},
+      "Description" : "WordPress Website"
+    }
+  }
+}
+
+
+
+Pipeline script to compile the CFT template:
+
+ pipeline{
+  agent{
+    node{
+    label 'master'
+    }
+  }
+  stages{
+    
+    stage('git clone'){
+      steps{
+        sh 'sudo rm -r *;sudo git clone https://github.com/Panthamajay/Jenkins-Job
+      }
+    }
+    stage('CFT'){
+      steps{
+        sh 'ls'
+        sh 'pwd'
+        
+        sh 'aws cloudformation create-stack --stack-name createec2 --template-body /var/lib/jenkins/workspace/Multi_pipe_master/Jenkins_sample/cerate_ec2_cft.json --region us-east-1'
+      }
+    }
+    
+ }
+  
+}
